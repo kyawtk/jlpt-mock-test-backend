@@ -1,0 +1,77 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+// Test Model
+model Test {
+    id          Int      @id @default(autoincrement())
+    level       String // e.g., "N5", "N4"
+    title       String // Title of the test, e.g., "N5 Vocabulary Test"
+    description String? // Additional details about the test
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    questions Question[] // Relation to questions in the test
+}
+
+// Question Model
+model Question {
+    id     Int  @id @default(autoincrement())
+    testId Int?
+    test   Test? @relation(fields: [testId], references: [id])
+
+    type    String // e.g., "vocabulary", "grammar", "reading", "listening"
+    content String // The question text or prompt
+
+    passage  String? // For reading questions, can store the reading passage text
+    audioUrl String? // For listening questions, URL to audio file
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    options   Option[] // Relation to answer options
+    answer    Answer? // Relation to correct answer
+    Section   Section? @relation(fields: [sectionId], references: [id])
+    sectionId Int?
+}
+
+// Option Model
+model Option {
+    id         Int      @id @default(autoincrement())
+    questionId Int
+    question   Question @relation(fields: [questionId], references: [id])
+
+    label   String // e.g., "A", "B", "C", "D"
+    content String // Text of the answer option
+    Answer  Answer[]
+}
+
+// Answer Model
+model Answer {
+    id         Int      @id @default(autoincrement())
+    questionId Int      @unique
+    question   Question @relation(fields: [questionId], references: [id])
+
+    optionId Int // Reference to the correct option
+    option   Option @relation(fields: [optionId], references: [id])
+}
+
+// Section Model (Optional)
+model Section {
+    id          Int     @id @default(autoincrement())
+    name        String // e.g., "Vocabulary", "Grammar", "Reading", "Listening"
+    description String? // Description or instructions for the section
+    
+    questions Question[]
+}
