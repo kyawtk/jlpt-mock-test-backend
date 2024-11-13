@@ -11,52 +11,12 @@ export class JlptService {
   // Create a new JLPT test
 
   async create(createTestDto: CreateTestDto): Promise<Test> {
-    const { questions, ...testData } = createTestDto;
-
-    const test = await this.prisma.test.create({
-      data: {
-        ...testData,
-        questions: {
-          create: questions.map((question) => ({
-            ...question,
-            options: {
-              create: question.options.map((option) => ({
-                label: option.label,
-                content: option.content,
-              })),
-            },
-          })),
-        },
-      },
-      include: {
-        questions: {
-          include: {
-            options: true,
-          },
-        },
-      },
-    });
-
-    return test;
+    return;
   }
 
   // Fetch all JLPT tests
   async getAllTests() {
-    return this.prisma.test.findMany({
-      include: {
-        questions: {
-          include: {
-            options: true,
-            answer: {
-              include: {
-                option: true, // Includes the related option content for the correct answer
-              },
-            },
-            Section: true, // Includes section data if present
-          },
-        },
-      },
-    });
+    return this.prisma.test.findMany();
   }
 
   // Fetch a specific test by ID
@@ -64,11 +24,7 @@ export class JlptService {
     return await this.prisma.test.findUnique({
       where: { id },
       include: {
-        questions: {
-          include: {
-            options: true, // Include options related to each question
-          },
-        },
+        questions: true,
       },
     });
   }
