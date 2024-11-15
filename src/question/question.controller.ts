@@ -8,7 +8,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiProperty, ApiTags } from '@nestjs/swagger';
 import { CreateQuestionDto } from './dto/create-question.dto';
 import { FilterDto } from './dto/filter.dto';
 import { UpdateQuestionDto } from './dto/update-question.dto';
@@ -19,8 +19,9 @@ import { QuestionService } from './question.service';
 export class QuestionController {
   constructor(private readonly questionService: QuestionService) {}
 
+  @ApiBody({ type: CreateQuestionDto, isArray: true })
   @Post()
-  create(@Body() createQuestionDto: CreateQuestionDto) {
+  create(@Body() createQuestionDto: CreateQuestionDto[]) {
     return this.questionService.create(createQuestionDto);
   }
 
@@ -30,7 +31,10 @@ export class QuestionController {
       ...(filters.type && { type: filters.type }),
       ...(filters.level && { level: filters.level }),
     };
-    return this.questionService.findAll(filtersarr);
+    const page = filters.page || 1;
+    const limit = filters.limit || 10;
+
+    return this.questionService.findAll(filtersarr, page, limit);
   }
 
   @Get(':id')

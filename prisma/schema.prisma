@@ -62,9 +62,11 @@ model Question {
 
     level Levels
 
-    passage  String? // For reading questions, can store the reading passage text
-    audioUrl String? // For listening questions, URL to audio file
-    imageUrl String? // For listening questions, URL to image file
+    passageId Int? // For vocabulary questions, can store the vocabulary passage ID
+    passage   Passage? @relation(fields: [passageId], references: [id])
+    
+    audioUrl  String? // For listening questions, URL to audio file
+    imageUrl  String? // For listening questions, URL to image file
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
@@ -85,4 +87,10 @@ model Section {
     description String? // Description or instructions for the section
 
     questions Question[]
+}
+
+model Passage {
+    id       Int        @id @default(autoincrement())
+    text     String
+    Question Question[]
 }

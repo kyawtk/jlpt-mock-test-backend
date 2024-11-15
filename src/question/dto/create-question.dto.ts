@@ -6,6 +6,7 @@ import {
   IsEnum,
   IsInt,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
   IsUrl,
@@ -35,8 +36,8 @@ export class CreateQuestionDto {
 
   @ApiProperty()
   @IsOptional()
-  @IsString()
-  passage?: string; // For reading questions, stores the passage text
+  @IsNumber()
+  passageId: number; // For reading questions, stores the passage text
 
   @ApiProperty()
   @IsOptional()
