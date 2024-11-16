@@ -28,6 +28,33 @@ enum QuestionTypes {
     listening
 }
 
+enum Roles {
+    admin
+    user
+}
+
+model User {
+    id       Int    @id @default(autoincrement())
+    email    String? @unique
+    phone    String? @unique
+    password String
+    name     String
+    role     Roles
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    receipts Receipt[]
+}
+
+model Receipt {
+    id        Int      @id @default(autoincrement())
+    userId    Int
+    user      User     @relation(fields: [userId], references: [id])
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
 model Exam {
     id        Int      @id @default(autoincrement())
     tests     Test[]
@@ -64,9 +91,9 @@ model Question {
 
     passageId Int? // For vocabulary questions, can store the vocabulary passage ID
     passage   Passage? @relation(fields: [passageId], references: [id])
-    
-    audioUrl  String? // For listening questions, URL to audio file
-    imageUrl  String? // For listening questions, URL to image file
+
+    audioUrl String? // For listening questions, URL to audio file
+    imageUrl String? // For listening questions, URL to image file
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt

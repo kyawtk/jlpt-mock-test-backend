@@ -27,6 +27,7 @@ export class QuestionController {
 
   @Get()
   findAll(@Query() filters: FilterDto) {
+    console.log(filters);
     const filtersarr = {
       ...(filters.type && { type: filters.type }),
       ...(filters.level && { level: filters.level }),
@@ -38,13 +39,13 @@ export class QuestionController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id') id: number) {
     return this.questionService.findOne(+id);
   }
 
   @Patch(':id')
   update(
-    @Param('id') id: string,
+    @Param('id') id: number,
     @Body() updateQuestionDto: UpdateQuestionDto,
   ) {
     return this.questionService.update(+id, updateQuestionDto);

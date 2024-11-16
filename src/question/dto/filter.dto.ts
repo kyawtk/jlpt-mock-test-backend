@@ -1,7 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Levels, QuestionTypes } from '@prisma/client';
-import { Transform } from 'class-transformer';
-import { IsInt, IsOptional, Min } from 'class-validator';
+import { IsInt, IsNumber, IsOptional } from 'class-validator';
 
 export class FilterDto {
   @ApiPropertyOptional()
@@ -13,16 +12,12 @@ export class FilterDto {
   level?: Levels;
 
   @ApiPropertyOptional({ description: 'Page number for pagination' })
-  @IsOptional()
   @IsInt()
-  @Min(1)
-  @Transform(({ value }) => parseInt(value, 10))
+  @IsOptional()
   page?: number;
 
   @ApiPropertyOptional({ description: 'Number of records per page' })
-  @IsOptional()
   @IsInt()
-  @Min(1)
-  @Transform(({ value }) => parseInt(value, 10))
+  @IsOptional()
   limit?: number;
 }

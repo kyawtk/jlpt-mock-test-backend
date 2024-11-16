@@ -6,7 +6,15 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors();
-  app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+    }),
+  );
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Jlpt ')
     .setVersion('1.0.0')
@@ -16,11 +24,11 @@ async function bootstrap() {
       bearerFormat: 'JWT',
     })
     // .addSecurityRequirements('bearer')
-    .build()
-    const document = SwaggerModule.createDocument(app, swaggerConfig);
+    .build();
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
 
-    // Set up the Swagger UI at a specific endpoint, such as "/api"
-    SwaggerModule.setup('api', app, document);
+  // Set up the Swagger UI at a specific endpoint, such as "/api"
+  SwaggerModule.setup('api', app, document);
 
   await app.listen(8000);
   // Log a message once the app is running

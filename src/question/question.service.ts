@@ -20,7 +20,7 @@ export class QuestionService {
           level: question.level,
           content: question.content,
           type: question.type,
-          passageId: question.passageId,
+          passageId: question?.passageId,
           audioUrl: question?.audioUrl,
           imageUrl: question?.imageUrl,
           options: question.options,
@@ -35,6 +35,9 @@ export class QuestionService {
 
     const [questions, total] = await Promise.all([
       this.prisma.question.findMany({
+        include: {
+          passage: true,
+        },
         where: filters,
         skip: skip,
         take: limit,
@@ -57,7 +60,7 @@ export class QuestionService {
   }
 
   update(id: number, updateQuestionDto: UpdateQuestionDto) {
-    return `This action updates a #${id} question`;
+    return null;
   }
 
   remove(id: number) {
