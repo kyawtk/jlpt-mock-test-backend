@@ -5,10 +5,11 @@ import { Message } from './entities/message.entity';
 @Injectable()
 export class MessageService {
   messages: Message[] = [{ name: 'ktk', text: 'hello' }];
-  userlist = [];
+
+  private userlist = new Map<string, string>();
 
   getUserName(clientId: string) {
-    return this.userlist[clientId];
+    return this.userlist.get(clientId);
   }
 
   create(createMessageDto: CreateMessageDto, clientId: string) {
@@ -25,24 +26,18 @@ export class MessageService {
   }
 
   join(name: string, clientId: string) {
-    this.userlist[clientId] = name;
-    return Object.values(this.userlist);
+    this.userlist.set(clientId, name);
+    return Array.from(this.userlist.values());
   }
 
-  leave(name: string, clientId: string) {
-    delete this.userlist[clientId];
-    return Object.values(this.userlist);
+  leave(clientId: string) {
+    this.userlist.delete(clientId);
+    return Array.from(this.userlist.values());
   }
 
-  //   async typing(isTyping: boolean, clientId: string) {
-  //     return Object.values(this.userlist);
-  //   }
-
-  findOne(id: number) {
-    return `This action returns a #${id} message`;
+  async typing(isTyping: boolean, clientId: string) {
+    return;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} message`;
-  }
+  
 }

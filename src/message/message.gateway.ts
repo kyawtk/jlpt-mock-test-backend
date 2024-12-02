@@ -10,82 +10,60 @@ import {
 import { Server, Socket } from 'socket.io';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { MessageService } from './message.service';
-
-@WebSocketGateway({
-  cors: {
-    origin: '*',
-  },
-})
+@WebSocketGateway({ cors: { origin: '*' } })
 export class MessageGateway
   implements OnGatewayConnection, OnGatewayDisconnect
 {
-  @WebSocketServer()
-  server: Server;
+  constructor(private messageService: MessageService) {}
+  @WebSocketServer() server: Server;
 
-  constructor(private readonly messageService: MessageService) {}
+  handleConnection(client: Socket) {
+    console.log(`Client connected: ${client.id}`);
+  }
 
-  async handleConnection(client: Socket) {
-    console.log('Client connected', client.id);
-    // client.emit('message', 'hello');
-    return;
+  handleDisconnect(client: Socket) {
+    const name = this.messageService.getUserName(client.id);
+    const users = this.messageService.leave(client.id);
+    this.server.emit('leave', users);
+    console.log(`${name} disconnected`);
   }
-  async handleDisconnect(client: Socket) {
-    console.log('Client disconnected', client.id);
-    return;
+
+  @SubscribeMessage('join')
+  join(@MessageBody('name') name: string, @ConnectedSocket() client: Socket) {
+    const users = this.messageService.join(name, client.id);
+    this.server.emit('join', users);
   }
+  @SubscribeMessage('leave')
+  leave(@ConnectedSocket() client: Socket) {
+    const users = this.messageService.leave(client.id);
+    console.log('🚀 ~ leave ~ users:', users);
+    this.server.emit('leave', users);
+  }
+  //emote heart
+  @SubscribeMessage('makeEmote')
+  emote(@MessageBody('text') text: string, @ConnectedSocket() client: Socket) {
+    const userName = this.messageService.getUserName(client.id);
+    this.server.emit('emote', { userName });
+  }
+
   @SubscribeMessage('createMessage')
-  create(
+  createMessage(
     @MessageBody() createMessageDto: CreateMessageDto,
     @ConnectedSocket() client: Socket,
   ) {
-    const message = this.messageService.create(createMessageDto, client.id);
+    const message = {
+      name: createMessageDto.name,
+      text: createMessageDto.text,
+    };
     this.server.emit('message', message);
-    return message;
-  }
-
-  @SubscribeMessage('findAllMessage')
-  findAll() {
-    return this.messageService.findAll();
-  }
-
-  //join channel
-  @SubscribeMessage('join')
-  joinChannel(
-    @MessageBody('name') name: string,
-    @ConnectedSocket() socket: Socket,
-  ) {
-    const allusers = this.messageService.join(name, socket.id);
-    socket.broadcast.emit('join', allusers);
-    return allusers;
-  }
-
-  //leave channel
-  @SubscribeMessage('leave')
-  leaveChannel(
-    @MessageBody('name') name: string,
-    @ConnectedSocket() socket: Socket,
-  ) {
-    const allusers = this.messageService.leave(name, socket.id);
-    socket.broadcast.emit('leave', allusers);
-    return allusers;
   }
 
   @SubscribeMessage('typing')
   async typing(
-    @MessageBody('typing') isTyping: boolean,
+    @MessageBody('isTyping') isTyping: boolean,
     @ConnectedSocket() client: Socket,
   ) {
-    const userName = await this.messageService.getUserName(client.id);
+    const userName = this.messageService.getUserName(client.id);
     client.broadcast.emit('typing', { userName, isTyping });
-  }
-
-  @SubscribeMessage('findOneMessage')
-  findOne(@MessageBody() id: number) {
-    return this.messageService.findOne(id);
-  }
-
-  @SubscribeMessage('removeMessage')
-  remove(@MessageBody() id: number) {
-    return this.messageService.remove(id);
   }
 }

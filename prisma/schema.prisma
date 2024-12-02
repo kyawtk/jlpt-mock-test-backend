@@ -34,7 +34,7 @@ enum Roles {
 }
 
 model User {
-    id       Int    @id @default(autoincrement())
+    id       Int     @id @default(autoincrement())
     email    String? @unique
     phone    String? @unique
     password String
@@ -76,18 +76,19 @@ model Test {
 
     questions Question[] // Relation to questions in the test
 
-    Exam   Exam? @relation(fields: [examId], references: [id])
-    examId Int?
+    Exam            Exam?             @relation(fields: [examId], references: [id])
+    examId          Int?
+    ReadingQuestion ReadingQuestion[]
 }
 
 // Question Model
 model Question {
     id Int @id @default(autoincrement())
 
-    type    QuestionTypes
+    type    QuestionTypes?
     content String // The question text or prompt
 
-    level Levels
+    Level Levels?
 
     passageId Int? // For vocabulary questions, can store the vocabulary passage ID
     passage   Passage? @relation(fields: [passageId], references: [id])
@@ -101,6 +102,27 @@ model Question {
     options            String[] // Relation to answer options
     correctOptionIndex Int? // Index of correct answer option
 
+    Test              Test?            @relation(fields: [testId], references: [id])
+    testId            Int?
+    Section           Section?         @relation(fields: [sectionId], references: [id])
+    sectionId         Int?
+    ReadingQuestion   ReadingQuestion? @relation(fields: [readingQuestionId], references: [id])
+    readingQuestionId Int?
+}
+
+model ReadingQuestion {
+    id Int @id @default(autoincrement())
+
+    type    String @default("reading")
+    passage String // The question text or prompt
+
+    level Levels
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    questions //i want to store like this [{content:'quetion 1 text', options:['option1, option2, option3']},corredctOptionIndex:0]
+
     Test      Test?    @relation(fields: [testId], references: [id])
     testId    Int?
     Section   Section? @relation(fields: [sectionId], references: [id])
@@ -113,7 +135,8 @@ model Section {
     name        String // e.g., "Vocabulary", "Grammar", "Reading", "Listening"
     description String? // Description or instructions for the section
 
-    questions Question[]
+    questions       Question[]
+    ReadingQuestion ReadingQuestion[]
 }
 
 model Passage {

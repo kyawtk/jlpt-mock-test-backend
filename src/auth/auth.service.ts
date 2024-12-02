@@ -10,11 +10,13 @@ import * as bcrypt from 'bcryptjs';
 import { UserService } from 'src/user/user.service';
 import { LoginDto } from './dto/login.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { JwtService } from '@nestjs/jwt';
 @Injectable()
 export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly prisma: PrismaService,
+    private readonly jwtService: JwtService,
   ) {}
 
   async verifyUser(userName: string, password: string) {
@@ -61,8 +63,11 @@ export class AuthService {
     }
   }
 
-  async login(user: LoginDto) {
-    const userData = this.verifyUser(user.name, user.password);
-    return userData;
+  async login(userData: LoginDto) {
+    const payload = {
+      name: userData.name,
+    };
+    const accessToken = this.jwtService.sign(payload);
+    return { accessToken, ...payload };
   }
 }

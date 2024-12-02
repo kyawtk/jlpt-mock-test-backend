@@ -1,7 +1,7 @@
-import { Body, Controller, Post } from '@nestjs/common';
-import { SignupDto } from './dto/signup.dto';
+import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginDto } from './dto/login.dto';
+import { SignupDto } from './dto/signup.dto';
+import { LocalGuard } from './local.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -14,11 +14,10 @@ export class AuthController {
     return this.authService.signup(user);
   }
 
-  //logout
-
+  @UseGuards(LocalGuard)
   @Post('/login')
-  login(@Body() loginDto: LoginDto) {
+  login(@Request() request) {
     // console.log('🚀 ~ AuthController ~ login ~ loginDto:', loginDto);
-    return this.authService.login(loginDto);
+    return this.authService.login(request.user);
   }
 }
